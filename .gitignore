@@ -1,0 +1,61 @@
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# .NET
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET local tools
+.dotnet/
+*.nupkg
+packages/
+
+# Test results
+**/TestResults/
+*.trx
+coverage/
+
+# ASP.NET
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.vite/
+frontend/**/.cache/
+
+# React / Vite
+frontend/**/coverage/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+
+# PostgreSQL local data
+postgres-data/
