@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TaskFlow.Application.Interfaces;
+using TaskFlow.Domain.Interfaces;
+using TaskFlow.Infrastructure.Authentication;
 using TaskFlow.Infrastructure.Data;
+using TaskFlow.Infrastructure.Repositories;
 
 namespace TaskFlow.Infrastructure;
 
@@ -16,7 +20,9 @@ public static class DependencyInjection
     services.AddDbContext<TaskFlowDbContext>(options =>
         options.UseNpgsql(connectionString));
 
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<ITokenService, JwtTokenService>();
+
     return services;
   }
 }
-
