@@ -4,6 +4,7 @@ public class TaskItem
 {
   public Guid Id { get; private set; }
 
+
   public string Title { get; private set; }
 
   public string Description { get; private set; }
@@ -36,5 +37,20 @@ public class TaskItem
     Status = TaskFlow.Domain.Enums.TaskStatus.Pending;
     CreatedAt = DateTime.UtcNow;
   }
-}
 
+  public void Update(
+      string title,
+      string description,
+      TaskFlow.Domain.Enums.TaskPriority priority,
+      TaskFlow.Domain.Enums.TaskStatus status,
+      DateTime? dueDate)
+  {
+    Title = title;
+    Description = description;
+    Priority = priority;
+    Status = status;
+    DueDate = dueDate;
+  }
+
+
+}

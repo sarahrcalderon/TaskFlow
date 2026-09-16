@@ -21,6 +21,8 @@ public static class DependencyInjection
         options.UseNpgsql(connectionString));
 
     services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IProjectRepository, ProjectRepository>();
+    services.AddScoped<ITaskRepository, TaskRepository>();
     services.AddScoped<ITokenService, JwtTokenService>();
 
     return services;

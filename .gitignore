@@ -59,3 +59,4 @@ docker-compose.override.yml
 
 # PostgreSQL local data
 postgres-data/
+.fake
