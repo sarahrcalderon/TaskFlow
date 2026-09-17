@@ -43,11 +43,18 @@ export function DashboardPage() {
   const { user, logout } = useAuth();
 
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
+
   const [projects, setProjects] = useState<Project[]>([]);
+
   const [tasks, setTasks] = useState<Task[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [hasError, setHasError] = useState(false);
+
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -60,6 +67,7 @@ export function DashboardPage() {
         const tasksByProject = await Promise.all(
           projectsData.map((project) => getTasks(project.id)),
         );
+
         const tasksData = tasksByProject.flat();
 
         setProfile(profileData);
@@ -97,8 +105,31 @@ export function DashboardPage() {
     }
   }
 
+  function handleOpenCreateProject() {
+    setSelectedProject(null);
+    setIsProjectModalOpen(true);
+  }
+
+  function handleOpenEditProject(project: Project) {
+    setSelectedProject(project);
+    setIsProjectModalOpen(true);
+  }
+
   function handleProjectCreated(project: Project) {
     setProjects((currentProjects) => [project, ...currentProjects]);
+  }
+
+  function handleProjectUpdated(project: Project) {
+    setProjects((currentProjects) =>
+      currentProjects.map((currentProject) =>
+        currentProject.id === project.id ? project : currentProject,
+      ),
+    );
+  }
+
+  function handleCloseProjectModal() {
+    setIsProjectModalOpen(false);
+    setSelectedProject(null);
   }
 
   if (isLoading) {
@@ -148,21 +179,25 @@ export function DashboardPage() {
           <StatsGrid>
             <StatCard>
               <StatLabel>Projetos</StatLabel>
+
               <StatValue>{projects.length}</StatValue>
             </StatCard>
 
             <StatCard>
               <StatLabel>Tarefas pendentes</StatLabel>
+
               <StatValue>{pendingTasks}</StatValue>
             </StatCard>
 
             <StatCard>
               <StatLabel>Em andamento</StatLabel>
+
               <StatValue>{inProgressTasks}</StatValue>
             </StatCard>
 
             <StatCard>
               <StatLabel>Concluídas</StatLabel>
+
               <StatValue>{completedTasks}</StatValue>
             </StatCard>
           </StatsGrid>
@@ -172,10 +207,7 @@ export function DashboardPage() {
           <SectionHeader>
             <SectionTitle>Projetos</SectionTitle>
 
-            <ActionButton
-              type="button"
-              onClick={() => setIsProjectModalOpen(true)}
-            >
+            <ActionButton type="button" onClick={handleOpenCreateProject}>
               Novo projeto
             </ActionButton>
           </SectionHeader>
@@ -195,6 +227,13 @@ export function DashboardPage() {
                   <ProjectActions>
                     <ProjectActionButton
                       type="button"
+                      onClick={() => handleOpenEditProject(project)}
+                    >
+                      Editar
+                    </ProjectActionButton>
+
+                    <ProjectActionButton
+                      type="button"
                       onClick={() => handleDeleteProject(project.id)}
                     >
                       Excluir
@@ -212,10 +251,7 @@ export function DashboardPage() {
           </SectionHeader>
 
           <QuickActions>
-            <ActionButton
-              type="button"
-              onClick={() => setIsProjectModalOpen(true)}
-            >
+            <ActionButton type="button" onClick={handleOpenCreateProject}>
               Novo projeto
             </ActionButton>
 
@@ -226,8 +262,10 @@ export function DashboardPage() {
 
       {isProjectModalOpen && (
         <ProjectModal
-          onClose={() => setIsProjectModalOpen(false)}
+          project={selectedProject}
+          onClose={handleCloseProjectModal}
           onCreated={handleProjectCreated}
+          onUpdated={handleProjectUpdated}
         />
       )}
     </PageContainer>

@@ -1,6 +1,10 @@
-import { useState, type FormEvent } from 'react';
-import { createTask } from '../../services/taskService';
-import type { Task, TaskPriority } from '../../types/task.types';
+import { useEffect, useState, type FormEvent } from 'react';
+import {
+  createTask,
+  updateTask,
+  type UpdateTaskRequest,
+} from '../../services/taskService';
+import type { Task, TaskPriority, TaskStatus } from '../../types/task.types';
 import {
   Actions,
   CancelButton,
@@ -22,17 +26,37 @@ import {
 
 interface TaskModalProps {
   projectId: string;
+  task?: Task | null;
   onClose: () => void;
   onCreated: (task: Task) => void;
+  onUpdated: (task: Task) => void;
 }
 
-export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
+export function TaskModal({
+  projectId,
+  task,
+  onClose,
+  onCreated,
+  onUpdated,
+}: TaskModalProps) {
+  const isEditing = Boolean(task);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('Medium');
+  const [status, setStatus] = useState<TaskStatus>('Pending');
   const [dueDate, setDueDate] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setTitle(task?.title ?? '');
+    setDescription(task?.description ?? '');
+    setPriority(task?.priority ?? 'Medium');
+    setStatus(task?.status ?? 'Pending');
+    setDueDate(task?.dueDate ? task.dueDate.substring(0, 10) : '');
+    setError('');
+  }, [task]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,18 +65,37 @@ export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
     setIsSubmitting(true);
 
     try {
-      const task = await createTask(projectId, {
-        title,
-        description,
-        priority,
-        dueDate: dueDate || null,
-        projectId,
-      });
+      if (task) {
+        const request: UpdateTaskRequest = {
+          title,
+          description,
+          priority,
+          status,
+          dueDate: dueDate || null,
+        };
 
-      onCreated(task);
+        const updatedTask = await updateTask(projectId, task.id, request);
+
+        onUpdated(updatedTask);
+      } else {
+        const createdTask = await createTask(projectId, {
+          title,
+          description,
+          priority,
+          dueDate: dueDate || null,
+          projectId,
+        });
+
+        onCreated(createdTask);
+      }
+
       onClose();
     } catch {
-      setError('Não foi possível criar a tarefa.');
+      setError(
+        isEditing
+          ? 'Não foi possível atualizar a tarefa.'
+          : 'Não foi possível criar a tarefa.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -63,9 +106,13 @@ export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
       <Modal>
         <Header>
           <HeaderContent>
-            <Title>Nova tarefa</Title>
+            <Title>{isEditing ? 'Editar tarefa' : 'Nova tarefa'}</Title>
 
-            <Subtitle>Crie uma tarefa para este projeto.</Subtitle>
+            <Subtitle>
+              {isEditing
+                ? 'Atualize as informações da tarefa.'
+                : 'Crie uma tarefa para este projeto.'}
+            </Subtitle>
           </HeaderContent>
         </Header>
 
@@ -95,7 +142,8 @@ export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Descreva o que precisa ser feito"
-              maxLength={1000}
+              minLength={2}
+              maxLength={2000}
               required
             />
           </Field>
@@ -117,6 +165,29 @@ export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
               <option value="Critical">Crítica</option>
             </Select>
           </Field>
+
+          {isEditing && (
+            <Field>
+              <Label htmlFor="task-status">Status</Label>
+
+              <Select
+                id="task-status"
+                name="status"
+                value={status}
+                onChange={(event) =>
+                  setStatus(event.target.value as TaskStatus)
+                }
+              >
+                <option value="Pending">Pendente</option>
+
+                <option value="InProgress">Em andamento</option>
+
+                <option value="Completed">Concluída</option>
+
+                <option value="Cancelled">Cancelada</option>
+              </Select>
+            </Field>
+          )}
 
           <Field>
             <Label htmlFor="task-due-date">Data de vencimento</Label>
@@ -142,7 +213,13 @@ export function TaskModal({ projectId, onClose, onCreated }: TaskModalProps) {
             </CancelButton>
 
             <SubmitButton type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Criando...' : 'Criar tarefa'}
+              {isSubmitting
+                ? isEditing
+                  ? 'Salvando...'
+                  : 'Criando...'
+                : isEditing
+                  ? 'Salvar alterações'
+                  : 'Criar tarefa'}
             </SubmitButton>
           </Actions>
         </Form>

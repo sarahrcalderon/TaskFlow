@@ -8,9 +8,11 @@ import {
 
 interface TaskListProps {
   tasks: Task[];
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
 }
 
-export function TaskList({ tasks }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <EmptyState>
@@ -22,7 +24,12 @@ export function TaskList({ tasks }: TaskListProps) {
   return (
     <TaskGrid>
       {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} />
+        <TaskCard
+          key={task.id}
+          task={task}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
     </TaskGrid>
   );

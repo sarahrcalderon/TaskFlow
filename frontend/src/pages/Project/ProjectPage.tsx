@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { TaskList } from '../../components/TaskList/TaskList';
 import { TaskModal } from '../../components/TaskModal/TaskModal';
 import { deleteProject, getProject } from '../../services/projectService';
-import { getTasks } from '../../services/taskService';
+import { deleteTask, getTasks } from '../../services/taskService';
 import type { Project } from '../../types/project.types';
 import type { Task } from '../../types/task.types';
 import {
@@ -39,6 +39,8 @@ export function ProjectPage() {
   const [hasError, setHasError] = useState(false);
 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -102,8 +104,55 @@ export function ProjectPage() {
     }
   }
 
+  function handleOpenCreateTask() {
+    setSelectedTask(null);
+    setIsTaskModalOpen(true);
+  }
+
+  function handleOpenEditTask(task: Task) {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  }
+
   function handleTaskCreated(task: Task) {
     setTasks((currentTasks) => [task, ...currentTasks]);
+  }
+
+  function handleTaskUpdated(task: Task) {
+    setTasks((currentTasks) =>
+      currentTasks.map((currentTask) =>
+        currentTask.id === task.id ? task : currentTask,
+      ),
+    );
+  }
+
+  async function handleDeleteTask(task: Task) {
+    if (!project) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Deseja realmente excluir a tarefa "${task.title}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteTask(project.id, task.id);
+
+      setTasks((currentTasks) =>
+        currentTasks.filter((currentTask) => currentTask.id !== task.id),
+      );
+    } catch {
+      window.alert('Não foi possível excluir a tarefa.');
+    }
+  }
+
+  function handleCloseTaskModal() {
+    setIsTaskModalOpen(false);
+    setSelectedTask(null);
   }
 
   if (isLoading) {
@@ -141,15 +190,16 @@ export function ProjectPage() {
           <SectionHeader>
             <SectionTitle>Tarefas ({tasks.length})</SectionTitle>
 
-            <ActionButton
-              type="button"
-              onClick={() => setIsTaskModalOpen(true)}
-            >
+            <ActionButton type="button" onClick={handleOpenCreateTask}>
               Nova tarefa
             </ActionButton>
           </SectionHeader>
 
-          <TaskList tasks={tasks} />
+          <TaskList
+            tasks={tasks}
+            onEdit={handleOpenEditTask}
+            onDelete={handleDeleteTask}
+          />
         </Section>
 
         <Section>
@@ -172,8 +222,10 @@ export function ProjectPage() {
       {isTaskModalOpen && (
         <TaskModal
           projectId={project.id}
-          onClose={() => setIsTaskModalOpen(false)}
+          task={selectedTask}
+          onClose={handleCloseTaskModal}
           onCreated={handleTaskCreated}
+          onUpdated={handleTaskUpdated}
         />
       )}
     </PageContainer>

@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { createProject } from '../../services/projectService';
+import { useEffect, useState, type FormEvent } from 'react';
+import { createProject, updateProject } from '../../services/projectService';
 import type { Project } from '../../types/project.types';
 import {
   Actions,
@@ -21,15 +21,30 @@ import {
 } from '../../styles/ProjectStyles/ProjectModal.styles';
 
 interface ProjectModalProps {
+  project?: Project | null;
   onClose: () => void;
   onCreated: (project: Project) => void;
+  onUpdated: (project: Project) => void;
 }
 
-export function ProjectModal({ onClose, onCreated }: ProjectModalProps) {
+export function ProjectModal({
+  project,
+  onClose,
+  onCreated,
+  onUpdated,
+}: ProjectModalProps) {
+  const isEditing = Boolean(project);
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setName(project?.name ?? '');
+    setDescription(project?.description ?? '');
+    setError('');
+  }, [project]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,15 +53,29 @@ export function ProjectModal({ onClose, onCreated }: ProjectModalProps) {
     setIsSubmitting(true);
 
     try {
-      const project = await createProject({
-        name,
-        description,
-      });
+      if (project) {
+        const updatedProject = await updateProject(project.id, {
+          name,
+          description,
+        });
 
-      onCreated(project);
+        onUpdated(updatedProject);
+      } else {
+        const createdProject = await createProject({
+          name,
+          description,
+        });
+
+        onCreated(createdProject);
+      }
+
       onClose();
     } catch {
-      setError('Não foi possível criar o projeto.');
+      setError(
+        isEditing
+          ? 'Não foi possível atualizar o projeto.'
+          : 'Não foi possível criar o projeto.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -57,12 +86,21 @@ export function ProjectModal({ onClose, onCreated }: ProjectModalProps) {
       <Modal>
         <Header>
           <HeaderContent>
-            <Title>Novo projeto</Title>
+            <Title>{isEditing ? 'Editar projeto' : 'Novo projeto'}</Title>
 
-            <Subtitle>Crie um projeto para organizar suas tarefas.</Subtitle>
+            <Subtitle>
+              {isEditing
+                ? 'Atualize as informações do projeto.'
+                : 'Crie um projeto para organizar suas tarefas.'}
+            </Subtitle>
           </HeaderContent>
 
-          <CloseButton type="button" onClick={onClose} aria-label="Fechar">
+          <CloseButton
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar"
+            disabled={isSubmitting}
+          >
             ×
           </CloseButton>
         </Header>
@@ -93,7 +131,8 @@ export function ProjectModal({ onClose, onCreated }: ProjectModalProps) {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Descreva o objetivo do projeto"
-              maxLength={500}
+              minLength={2}
+              maxLength={2000}
               required
             />
           </Field>
@@ -110,7 +149,13 @@ export function ProjectModal({ onClose, onCreated }: ProjectModalProps) {
             </CancelButton>
 
             <SubmitButton type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Criando...' : 'Criar projeto'}
+              {isSubmitting
+                ? isEditing
+                  ? 'Salvando...'
+                  : 'Criando...'
+                : isEditing
+                  ? 'Salvar alterações'
+                  : 'Criar projeto'}
             </SubmitButton>
           </Actions>
         </Form>

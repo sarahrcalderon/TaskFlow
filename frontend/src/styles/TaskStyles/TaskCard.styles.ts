@@ -41,3 +41,20 @@ export const Badge = styled.span`
   font-size: 12px;
   font-weight: 600;
 `;
+
+export const Actions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+`;
+
+export const ActionButton = styled.button`
+  padding: 8px 12px;
+  cursor: pointer;
+`;
+
+export const DangerButton = styled.button`
+  padding: 8px 12px;
+  cursor: pointer;
+`;

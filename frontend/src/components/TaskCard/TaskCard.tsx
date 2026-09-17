@@ -1,14 +1,19 @@
 import type { Task, TaskPriority, TaskStatus } from '../../types/task.types';
 import {
+  Actions,
+  Badge,
   Card,
   Description,
   Meta,
-  Badge,
   Title,
+  ActionButton,
+  DangerButton,
 } from '../../styles/TaskStyles/TaskCard.styles';
 
 interface TaskCardProps {
   task: Task;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
 }
 
 function getStatusLabel(status: TaskStatus) {
@@ -33,7 +38,7 @@ function getPriorityLabel(priority: TaskPriority) {
   return labels[priority];
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   return (
     <Card>
       <Title>{task.title}</Title>
@@ -41,9 +46,9 @@ export function TaskCard({ task }: TaskCardProps) {
       <Description>{task.description}</Description>
 
       <Meta>
-        <Badge>{getStatusLabel(task.status)}</Badge>
+        <Badge>Status: {getStatusLabel(task.status)}</Badge>
 
-        <Badge>{getPriorityLabel(task.priority)}</Badge>
+        <Badge>Prioridade: {getPriorityLabel(task.priority)}</Badge>
 
         {task.dueDate && (
           <Badge>
@@ -51,6 +56,16 @@ export function TaskCard({ task }: TaskCardProps) {
           </Badge>
         )}
       </Meta>
+
+      <Actions>
+        <ActionButton type="button" onClick={() => onEdit(task)}>
+          Editar
+        </ActionButton>
+
+        <DangerButton type="button" onClick={() => onDelete(task)}>
+          Excluir
+        </DangerButton>
+      </Actions>
     </Card>
   );
 }
