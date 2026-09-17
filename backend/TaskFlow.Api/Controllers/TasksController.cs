@@ -25,29 +25,19 @@ public class TasksController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var task = await _taskService.CreateAsync(
-          ownerId,
-          projectId,
-          request);
+    var task = await _taskService.CreateAsync(
+        ownerId,
+        projectId,
+        request);
 
-      return CreatedAtAction(
-          nameof(GetById),
-          new
-          {
-            projectId,
-            taskId = task.Id
-          },
-          task);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return CreatedAtAction(
+        nameof(GetById),
+        new
+        {
+          projectId,
+          taskId = task.Id
+        },
+        task);
   }
 
   [HttpGet]
@@ -56,21 +46,11 @@ public class TasksController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var tasks = await _taskService.GetAllAsync(
-          ownerId,
-          projectId);
+    var tasks = await _taskService.GetAllAsync(
+        ownerId,
+        projectId);
 
-      return Ok(tasks);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return Ok(tasks);
   }
 
   [HttpGet("{taskId:guid}")]
@@ -80,22 +60,12 @@ public class TasksController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var task = await _taskService.GetByIdAsync(
-          ownerId,
-          projectId,
-          taskId);
+    var task = await _taskService.GetByIdAsync(
+        ownerId,
+        projectId,
+        taskId);
 
-      return Ok(task);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return Ok(task);
   }
 
   [HttpPut("{taskId:guid}")]
@@ -106,23 +76,13 @@ public class TasksController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var task = await _taskService.UpdateAsync(
-          ownerId,
-          projectId,
-          taskId,
-          request);
+    var task = await _taskService.UpdateAsync(
+        ownerId,
+        projectId,
+        taskId,
+        request);
 
-      return Ok(task);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return Ok(task);
   }
 
   [HttpDelete("{taskId:guid}")]
@@ -132,22 +92,12 @@ public class TasksController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      await _taskService.DeleteAsync(
-          ownerId,
-          projectId,
-          taskId);
+    await _taskService.DeleteAsync(
+        ownerId,
+        projectId,
+        taskId);
 
-      return NoContent();
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return NoContent();
   }
 
   private Guid GetUserId()
@@ -158,10 +108,9 @@ public class TasksController : ControllerBase
     if (!Guid.TryParse(userId, out var parsedUserId))
     {
       throw new UnauthorizedAccessException(
-          "Authenticated user ID is invalid.");
+          "ID inválido.");
     }
 
     return parsedUserId;
   }
-
 }

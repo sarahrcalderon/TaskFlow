@@ -1,6 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TaskFlow.Application.DTOs.Projects;
 
 public record UpdateProjectRequest(
+    [Required]
+    [StringLength(150, MinimumLength = 2)]
     string Name,
+
+    [Required]
+    [StringLength(1000, MinimumLength = 2)]
     string Description
 );

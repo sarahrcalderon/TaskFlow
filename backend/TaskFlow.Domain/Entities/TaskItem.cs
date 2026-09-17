@@ -4,7 +4,6 @@ public class TaskItem
 {
   public Guid Id { get; private set; }
 
-
   public string Title { get; private set; }
 
   public string Description { get; private set; }
@@ -19,7 +18,7 @@ public class TaskItem
 
   public Guid ProjectId { get; private set; }
 
-  public Project Project { get; private set; }
+  public Project? Project { get; private set; }
 
   public TaskItem(
       string title,
@@ -51,6 +50,4 @@ public class TaskItem
     Status = status;
     DueDate = dueDate;
   }
-
-
 }

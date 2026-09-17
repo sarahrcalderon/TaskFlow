@@ -49,21 +49,11 @@ public class ProjectsController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var project = await _projectService.GetByIdAsync(
-          ownerId,
-          id);
+    var project = await _projectService.GetByIdAsync(
+        ownerId,
+        id);
 
-      return Ok(project);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return Ok(project);
   }
 
   [HttpPut("{id:guid}")]
@@ -73,22 +63,12 @@ public class ProjectsController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      var project = await _projectService.UpdateAsync(
-          ownerId,
-          id,
-          request);
+    var project = await _projectService.UpdateAsync(
+        ownerId,
+        id,
+        request);
 
-      return Ok(project);
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return Ok(project);
   }
 
   [HttpDelete("{id:guid}")]
@@ -96,21 +76,11 @@ public class ProjectsController : ControllerBase
   {
     var ownerId = GetUserId();
 
-    try
-    {
-      await _projectService.DeleteAsync(
-          ownerId,
-          id);
+    await _projectService.DeleteAsync(
+        ownerId,
+        id);
 
-      return NoContent();
-    }
-    catch (KeyNotFoundException exception)
-    {
-      return NotFound(new
-      {
-        message = exception.Message
-      });
-    }
+    return NoContent();
   }
 
   private Guid GetUserId()
@@ -121,7 +91,7 @@ public class ProjectsController : ControllerBase
     if (!Guid.TryParse(userId, out var parsedUserId))
     {
       throw new UnauthorizedAccessException(
-          "Authenticated user ID is invalid.");
+          "ID inválido.");
     }
 
     return parsedUserId;

@@ -12,7 +12,7 @@ public class Project
 
   public Guid OwnerId { get; private set; }
 
-  public User Owner { get; private set; }
+  public User? Owner { get; private set; }
 
   public ICollection<TaskItem> Tasks { get; private set; }
 
@@ -27,5 +27,13 @@ public class Project
     OwnerId = ownerId;
     CreatedAt = DateTime.UtcNow;
     Tasks = new List<TaskItem>();
+  }
+
+  public void Update(
+      string name,
+      string description)
+  {
+    Name = name;
+    Description = description;
   }
 }
