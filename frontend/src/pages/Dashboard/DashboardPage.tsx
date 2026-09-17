@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { ProjectModal } from '../../components/ProjectModal/ProjectModal';
 import { useAuth } from '../../hooks/useAuth';
 import {
   getProfile,
   type ProfileResponse,
 } from '../../services/profileService';
-import { getProjects } from '../../services/projectService';
+import { deleteProject, getProjects } from '../../services/projectService';
 import { getTasks } from '../../services/taskService';
 import type { Project } from '../../types/project.types';
 import type { Task } from '../../types/task.types';
@@ -19,6 +20,8 @@ import {
   LoadingMessage,
   LogoutButton,
   PageContainer,
+  ProjectActionButton,
+  ProjectActions,
   ProjectCard,
   ProjectDescription,
   ProjectsGrid,
@@ -44,6 +47,7 @@ export function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -70,6 +74,32 @@ export function DashboardPage() {
 
     loadDashboard();
   }, []);
+
+  async function handleDeleteProject(id: string) {
+    const confirmed = window.confirm('Deseja realmente excluir este projeto?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteProject(id);
+
+      setProjects((currentProjects) =>
+        currentProjects.filter((project) => project.id !== id),
+      );
+
+      setTasks((currentTasks) =>
+        currentTasks.filter((task) => task.projectId !== id),
+      );
+    } catch {
+      window.alert('Não foi possível excluir o projeto.');
+    }
+  }
+
+  function handleProjectCreated(project: Project) {
+    setProjects((currentProjects) => [project, ...currentProjects]);
+  }
 
   if (isLoading) {
     return <LoadingMessage>Carregando painel...</LoadingMessage>;
@@ -141,6 +171,13 @@ export function DashboardPage() {
         <Section>
           <SectionHeader>
             <SectionTitle>Projetos</SectionTitle>
+
+            <ActionButton
+              type="button"
+              onClick={() => setIsProjectModalOpen(true)}
+            >
+              Novo projeto
+            </ActionButton>
           </SectionHeader>
 
           {projects.length === 0 ? (
@@ -154,6 +191,15 @@ export function DashboardPage() {
                   <ProjectTitle>{project.name}</ProjectTitle>
 
                   <ProjectDescription>{project.description}</ProjectDescription>
+
+                  <ProjectActions>
+                    <ProjectActionButton
+                      type="button"
+                      onClick={() => handleDeleteProject(project.id)}
+                    >
+                      Excluir
+                    </ProjectActionButton>
+                  </ProjectActions>
                 </ProjectCard>
               ))}
             </ProjectsGrid>
@@ -166,12 +212,24 @@ export function DashboardPage() {
           </SectionHeader>
 
           <QuickActions>
-            <ActionButton type="button">Novo projeto</ActionButton>
+            <ActionButton
+              type="button"
+              onClick={() => setIsProjectModalOpen(true)}
+            >
+              Novo projeto
+            </ActionButton>
 
             <ActionButton type="button">Nova tarefa</ActionButton>
           </QuickActions>
         </Section>
       </DashboardContainer>
+
+      {isProjectModalOpen && (
+        <ProjectModal
+          onClose={() => setIsProjectModalOpen(false)}
+          onCreated={handleProjectCreated}
+        />
+      )}
     </PageContainer>
   );
 }

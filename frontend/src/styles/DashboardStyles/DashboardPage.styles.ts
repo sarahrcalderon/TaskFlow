@@ -109,10 +109,13 @@ export const ProjectsGrid = styled.div`
 `;
 
 export const ProjectCard = styled.div`
+  display: flex;
+  flex-direction: column;
   min-height: 150px;
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
+  box-sizing: border-box;
 `;
 
 export const ProjectTitle = styled.h3`
@@ -120,7 +123,20 @@ export const ProjectTitle = styled.h3`
 `;
 
 export const ProjectDescription = styled.p`
+  flex: 1;
   margin: 0;
+`;
+
+export const ProjectActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+`;
+
+export const ProjectActionButton = styled.button`
+  padding: 8px 12px;
+  cursor: pointer;
 `;
 
 export const EmptyState = styled.div`
